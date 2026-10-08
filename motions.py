@@ -10,6 +10,11 @@ from rclpy.qos import QoSProfile, ReliabilityPolicy, DurabilityPolicy
     # For sending velocity commands to the robot: Twist
     # For the sensors: Imu, LaserScan, and Odometry
 # Check the online documentation to fill in the lines below
+
+""" 
+Added import statements for Twist (standard message for linear/angular velocity commands),
+LaserScan (message type for lidar), Odometry (message type for wheel encoders)
+"""
 from geometry_msgs.msg import Twist
 from sensor_msgs.msg import Imu
 from sensor_msgs.msg import LaserScan
@@ -40,6 +45,7 @@ class motion_executioner(Node):
         self.laser_initialized=False
         
         # TODO Part 3: Create a publisher to send velocity commands by setting the proper parameters in (...)
+        # publishes Twist to the /cmd_vel topic, with 10 being the max queue size
         self.vel_publisher=self.create_publisher(Twist, '/cmd_vel', 10)
                 
         # loggers
@@ -48,9 +54,15 @@ class motion_executioner(Node):
         self.laser_logger=Logger('laser_content_'+str(motion_types[motion_type])+'.csv', headers=["ranges", "angle_increment", "stamp"])
         
         # TODO Part 3: Create the QoS profile by setting the proper parameters in (...)
+        """ 
+        BEST_EFFORT means that the QoS profile drops stale messages instead of retrying, since only latest readings matter,
+        VOLATILE means it only receives messages published after it subscribes, so no stored history
+        """
         qos=QoSProfile(depth=10, reliability=ReliabilityPolicy.BEST_EFFORT, durability=DurabilityPolicy.VOLATILE)
 
         # TODO Part 5: Create below the subscription to the topics corresponding to the respective sensors
+        # each subscription pairs a message type with a topic and a callback function
+
         # IMU subscription
         self.imu_subscription=self.create_subscription(Imu, '/imu', self.imu_callback, qos)
         
@@ -69,13 +81,14 @@ class motion_executioner(Node):
     # such: Time.from_msg(imu_msg.header.stamp).nanoseconds
     # You can save the needed fields into a list, and pass the list to the log_values function in utilities.py
 
+    # takes timestamp from msg header, logs linear_acceleration and sets imu init to true
     def imu_callback(self, imu_msg: Imu):
         # log imu msgs
         ts = Time.from_msg(imu_msg.header.stamp).nanoseconds
         self.imu_logger.log_values([imu_msg.linear_acceleration.x, imu_msg.linear_acceleration.y, imu_msg.angular_velocity.z, ts])
         self.imu_initialized = True
 
-
+    # takes timestamp from msg header, logs position and theta (derived from quarternion) and sets odom init to true
     def odom_callback(self, odom_msg: Odometry):
 
         # log odom msgs
@@ -88,6 +101,7 @@ class motion_executioner(Node):
         self.odom_logger.log_values([position.x, position.y, theta, ts])
         self.odom_initialized = True
 
+    # takes timestamp from msg header, logs ranges and angle_increment and sets laser init to true
     def laser_callback(self, laser_msg: LaserScan):
         # log laser msgs with position msg at that time
         ts = Time.from_msg(laser_msg.header.stamp).nanoseconds
@@ -121,7 +135,12 @@ class motion_executioner(Node):
         
     
     # TODO Part 4: Motion functions: complete the functions to generate the proper messages corresponding to the desired motions of the robot
+    """
+    Turtlebot is differential drive, so only linear.x (forward/backward speed) and angular.z (yaw/turn rate) are effective.
+    All other values are set to 0.
+    """
 
+    # constant linear and angular velocity result in a circular drive path. Radius = v/w = 0.1/0.1 = 1 meter
     def make_circular_twist(self):
         
         msg=Twist()
@@ -136,6 +155,7 @@ class motion_executioner(Node):
         
         return msg
 
+    # constant angular velocity, with radius growing by 0.0005 each 0.1s and increasing linear velocity, results in spiral shape
     def make_spiral_twist(self):
         msg=Twist()
 
@@ -150,7 +170,8 @@ class motion_executioner(Node):
         msg.angular.z = 0.5
 
         return msg
-    
+
+    # angular velocity set to zero, linear velocity increases by 0.005 every 0.1s, accelerates in straight line
     def make_acc_line_twist(self):
         msg=Twist()
 

@@ -23,6 +23,7 @@ class Logger:
         with open(self.filename, 'a') as file:
             vals_str=""
 
+            # each val is converted to str and seperated by comma for csv formatting
             for val in values_list:
                 vals_str+=str(val) + ", "
             
@@ -80,6 +81,8 @@ class FileReader:
 
 
 # TODO Part 5: Implement the conversion from Quaternion to Euler Angles
+# unpacks quarternion into components and computs yaw with standard quarternion to euler formula
+# only yaw is required since turtlebot cannot roll or pitch on flat ground, formulas left commented out for reference
 def euler_from_quaternion(quat):
     """
     Convert quaternion (w in last place) to euler roll, pitch, yaw.
