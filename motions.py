@@ -151,7 +151,7 @@ class motion_executioner(Node):
 
         msg.angular.x = 0.0
         msg.angular.y = 0.0
-        msg.angular.z = 0.1
+        msg.angular.z = 0.25
         
         return msg
 
@@ -175,7 +175,7 @@ class motion_executioner(Node):
     def make_acc_line_twist(self):
         msg=Twist()
 
-        self.velocity_ += 0.005
+        self.velocity_ += 0.01
 
         msg.linear.x = min(0.1 + self.velocity_, 0.2)
         msg.linear.y = 0.0
