@@ -161,7 +161,7 @@ class motion_executioner(Node):
 
         self.radius_ += 0.0005
 
-        msg.linear.x = min(0.1 + self.radius_, 0.2)
+        msg.linear.x = 0.1 + self.radius_
         msg.linear.y = 0.0
         msg.linear.z = 0.0
 
@@ -177,7 +177,7 @@ class motion_executioner(Node):
 
         self.velocity_ += 0.01
 
-        msg.linear.x = min(0.1 + self.velocity_, 0.2)
+        msg.linear.x = 0.1 + self.velocity_
         msg.linear.y = 0.0
         msg.linear.z = 0.0
 
