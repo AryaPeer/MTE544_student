@@ -26,6 +26,7 @@ class localization(Node):
         
         if localizationType == rawSensor:
             # TODO Part 3: subscribe to the position sensor topic (Odometry)
+            # subscribe to the topic "/odom" and use the callback function "odom_callback" to process the incoming messages
             self.create_subscription(odom, "/odom", self.odom_callback, odom_qos)
         else:
             print("This type doesn't exist", sys.stderr)
@@ -47,6 +48,7 @@ class localization(Node):
 # Here put a guard that makes the node run, ONLY when run as a main thread!
 # This is to make sure this node functions right before using it in decision.py
 
+# main guard: initialize ROS and spin the localization node
 if __name__ == "__main__":
     init()
     localizer=localization(rawSensor)

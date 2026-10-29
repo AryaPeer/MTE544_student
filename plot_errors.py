@@ -2,8 +2,6 @@ import matplotlib.pyplot as plt
 from utilities import FileReader
 
 
-
-
 def plot_errors(filename):
     
     headers, values=FileReader(filename).read_file()
@@ -35,11 +33,6 @@ def plot_errors(filename):
     plt.show()
     
     
-
-
-
-
-
 import argparse
 
 if __name__=="__main__":
@@ -54,6 +47,3 @@ if __name__=="__main__":
     filenames=args.files
     for filename in filenames:
         plot_errors(filename)
-
-
-

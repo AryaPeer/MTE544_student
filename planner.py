@@ -1,6 +1,6 @@
 # Type of planner
 POINT_PLANNER=0; TRAJECTORY_PLANNER=1
-TRAJECTORY="parabola"
+TRAJECTORY="parabola"   # pick which trajectory to use "parabola" or "sigmoid"
 
 import numpy as np
 
@@ -28,12 +28,12 @@ class planner:
     def trajectory_planner(self):
         # parabola - y = x^2 (0 <= x <= 1.5) 
         if TRAJECTORY == "parabola":
-            parabola_traj = [[x, x**2] for x in np.linspace(0, 1.5, 50)]
+            parabola_traj = [[x, x**2] for x in np.linspace(0, 1.5, 50)] # 50 evenly spaced points between 0 and 1.5
             return parabola_traj
         
         if TRAJECTORY == "sigmoid":
             # sigmoid - y = 2/(1+exp(-2x)) -1 (0 <=x <= 2.5)
-            sigmoid_traj = [[x, 2/(1+np.exp(-2*x)) - 1] for x in np.linspace(0, 2.5, 50)]
+            sigmoid_traj = [[x, 2/(1+np.exp(-2*x)) - 1] for x in np.linspace(0, 2.5, 50)] # 50 evenly spaced points between 0 and 2.5
             return sigmoid_traj
 
         raise ValueError("Unknown trajectory type: {}".format(TRAJECTORY))

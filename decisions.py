@@ -61,11 +61,11 @@ class decision_maker(Node):
 
     def timerCallback(self):
 
-        tolerance_lin_error = 0.1
+        tolerance_lin_error = 0.1 # Distance (m) to the goal at which the robot counts it as reached
         
         # TODO Part 3: Run the localization node
         # Remember that this file is already running the decision_maker node.
-        spin_once(self.localizer)
+        spin_once(self.localizer)   # Spin the localization node once to process the newest odometry message
 
         if self.localizer.getPose()  is  None:
             print("waiting for odom msgs ....")
@@ -74,6 +74,8 @@ class decision_maker(Node):
         vel_msg=Twist()
         
         # TODO Part 3: Check if you reached the goal
+
+        # A trajectory (list) is finished when the robot is close to its last waypoint; a point goal when it is close to that point
         if type(self.goal) == list:
             reached_goal = calculate_linear_error(self.localizer.getPose(), self.goal[-1]) < tolerance_lin_error
         else: 
@@ -92,9 +94,10 @@ class decision_maker(Node):
         velocity, yaw_rate = self.controller.vel_request(self.localizer.getPose(), self.goal, True)
 
         #TODO Part 4: Publish the velocity to move the robot
+        # Put the controller outputs into the Twist message: forward speed (linear.x) and turn rate (angular.z)
         vel_msg.linear.x = velocity
         vel_msg.angular.z = yaw_rate
-        self.publisher.publish(vel_msg)
+        self.publisher.publish(vel_msg) # Publish the velocity command to move the robot
 
 import argparse
 
