@@ -37,12 +37,12 @@ class decision_maker(Node):
         # TODO Part 5: Tune your parameters here
     
         if motion_type == POINT_PLANNER:
-            self.controller=controller(klp=0.2, klv=0.5, kap=0.8, kav=0.6)
+            self.controller=controller()
             self.planner=planner(POINT_PLANNER)    
     
     
         elif motion_type==TRAJECTORY_PLANNER:
-            self.controller=trajectoryController(klp=0.2, klv=0.5, kap=0.8, kav=0.6)
+            self.controller=trajectoryController()
             self.planner=planner(TRAJECTORY_PLANNER)
 
         else:
@@ -61,7 +61,7 @@ class decision_maker(Node):
 
     def timerCallback(self):
 
-        tolerance_lin_error = 0.1 # Distance (m) to the goal at which the robot counts it as reached
+        tolerance_lin_error = 0.035 # Distance (m) to the goal at which the robot counts it as reached
         
         # TODO Part 3: Run the localization node
         # Remember that this file is already running the decision_maker node.
@@ -109,12 +109,12 @@ def main(args=None):
     # TODO Part 3: You migh need to change the QoS profile based on whether you're using the real robot or in simulation.
     # Remember to define your QoS profile based on the information available in "ros2 topic info /odom --verbose" as explained in Tutorial 3
     
-    odom_qos=QoSProfile(depth=10, reliability=ReliabilityPolicy.RELIABLE, durability=DurabilityPolicy.VOLATILE)
+    odom_qos=QoSProfile(depth=10, reliability=ReliabilityPolicy.BEST_EFFORT, durability=DurabilityPolicy.VOLATILE, history=1)
     # odom_qos=QoSProfile(reliability=2, durability=2, history=1, depth=10)
 
     # TODO Part 4: instantiate the decision_maker with the proper parameters for moving the robot
     if args.motion.lower() == "point":
-        DM=decision_maker(Twist, "/cmd_vel", 10, [1.0, 1.0], rate=10, motion_type=POINT_PLANNER)
+        DM=decision_maker(Twist, "/cmd_vel", 10, [0.75, 0.75], rate=10, motion_type=POINT_PLANNER)
     elif args.motion.lower() == "trajectory":
         DM=decision_maker(Twist, "/cmd_vel", 10, [1.0, 1.0], rate=10, motion_type=TRAJECTORY_PLANNER)
     else:

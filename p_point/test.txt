@@ -1,0 +1,3 @@
+def __init__(self, klp=0.4, klv=0.2, kli=0.2, kap=1.2, kav=0.2, kai=0.2):
+
+same for p pd and pi, just changing which one is active

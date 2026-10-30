@@ -1,6 +1,6 @@
 # Type of planner
 POINT_PLANNER=0; TRAJECTORY_PLANNER=1
-TRAJECTORY="parabola"   # pick which trajectory to use "parabola" or "sigmoid"
+TRAJECTORY="sigmoid"   # pick which trajectory to use "parabola" or "sigmoid"
 
 import numpy as np
 

@@ -1,0 +1,1 @@
+self, klp=0.4, klv=0.15, kli=0.3, kap=1.1, kav=0.15, kai=0.3)
