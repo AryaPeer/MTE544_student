@@ -1,15 +1,12 @@
-# Saves x-y plots of the parabola and sigmoid runs against their reference curves to plots/
-#
-# Usage:
-#   python3 plot_trajectories.py
+# run this from root with: python3 analysis/trajectory_figures.py
 
 import os
 
 import matplotlib.pyplot as plt
 import numpy as np
 
-from plot_point_tracking import read_csv
-from plot_report_figures import AQUA, BLUE, ORANGE, OUTPUT_DIR, ROOT  # also applies the shared plot style
+from plot_run import read_csv
+from point_figures import AQUA, BLUE, ORANGE, OUTPUT_DIR, ROOT
 
 AXIS_LIMITS = (-0.1, 2.6)
 
@@ -41,11 +38,11 @@ def main():
     os.makedirs(OUTPUT_DIR, exist_ok=True)
 
     plot_trajectory(
-        "Parabola trajectory: x vs y", "pid-parabola", "Reference: $y = x^2$",
+        "Parabola trajectory: x vs y", "data/trajectory/parabola", "Reference: $y = x^2$",
         lambda x: x**2, 1.5, "parabola_trajectory.png",
     )
     plot_trajectory(
-        "Sigmoid trajectory: x vs y", "pid-sigmoid", r"Reference: $y = \frac{2}{1 + e^{-2x}} - 1$",
+        "Sigmoid trajectory: x vs y", "data/trajectory/sigmoid", r"Reference: $y = \frac{2}{1 + e^{-2x}} - 1$",
         lambda x: 2 / (1 + np.exp(-2 * x)) - 1, 2.5, "sigmoid_trajectory.png",
     )
 

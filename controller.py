@@ -58,7 +58,6 @@ class trajectoryController(controller):
 
         # TODO Part 5: Add saturation limits for the robot linear and angular velocity
 
-        # Same velocity saturation limits as the point controller
         linear_vel = max(0.0, min(0.3, linear_vel)) # potentially ~ 0.3 for in lab
         angular_vel= max(-1.9, min(1.9, angular_vel)) # potentially ~ 1.9 for in lab
         

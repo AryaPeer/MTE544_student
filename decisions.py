@@ -61,11 +61,11 @@ class decision_maker(Node):
 
     def timerCallback(self):
 
-        tolerance_lin_error = 0.035 # Distance (m) to the goal at which the robot counts it as reached
+        tolerance_lin_error = 0.035
         
         # TODO Part 3: Run the localization node
         # Remember that this file is already running the decision_maker node.
-        spin_once(self.localizer)   # Spin the localization node once to process the newest odometry message
+        spin_once(self.localizer)
 
         if self.localizer.getPose()  is  None:
             print("waiting for odom msgs ....")
@@ -75,7 +75,6 @@ class decision_maker(Node):
         
         # TODO Part 3: Check if you reached the goal
 
-        # A trajectory (list) is finished when the robot is close to its last waypoint; a point goal when it is close to that point
         if type(self.goal) == list:
             reached_goal = calculate_linear_error(self.localizer.getPose(), self.goal[-1]) < tolerance_lin_error
         else: 
@@ -94,10 +93,9 @@ class decision_maker(Node):
         velocity, yaw_rate = self.controller.vel_request(self.localizer.getPose(), self.goal, True)
 
         #TODO Part 4: Publish the velocity to move the robot
-        # Put the controller outputs into the Twist message: forward speed (linear.x) and turn rate (angular.z)
         vel_msg.linear.x = velocity
         vel_msg.angular.z = yaw_rate
-        self.publisher.publish(vel_msg) # Publish the velocity command to move the robot
+        self.publisher.publish(vel_msg)
 
 import argparse
 
@@ -110,7 +108,6 @@ def main(args=None):
     # Remember to define your QoS profile based on the information available in "ros2 topic info /odom --verbose" as explained in Tutorial 3
     
     odom_qos=QoSProfile(depth=10, reliability=ReliabilityPolicy.BEST_EFFORT, durability=DurabilityPolicy.VOLATILE, history=1)
-    # odom_qos=QoSProfile(reliability=2, durability=2, history=1, depth=10)
 
     # TODO Part 4: instantiate the decision_maker with the proper parameters for moving the robot
     if args.motion.lower() == "point":

@@ -1,12 +1,11 @@
-#   python3 metrics_analysis.py
+# run this from root with: python3 analysis/metrics.py
 
 import os
 from math import copysign, cos, nan
 
-from plot_point_tracking import read_csv
+from plot_run import ROOT, read_csv
 
-ROOT = os.path.dirname(os.path.abspath(__file__))
-RUNS = {"P": "p_point", "PID": "pid_point_tuned"}
+RUNS = {"P": "data/point/p_tuned", "PID": "data/point/pid_tuned"}
 SETTLING_BAND = 0.05
 
 
@@ -14,7 +13,6 @@ def load_errors(folder):
     linear = read_csv(os.path.join(ROOT, folder, "linear.csv"))
     angular = read_csv(os.path.join(ROOT, folder, "angular.csv"))
 
-    # Both logs are written on the same control step, so rows line up one to one
     n = min(len(linear["e"]), len(angular["e"]))
     t = [(stamp - linear["stamp"][0]) / 1e9 for stamp in linear["stamp"][:n]]
     e_lin = [copysign(d, cos(th)) for d, th in zip(linear["e"][:n], angular["e"][:n])]
@@ -35,7 +33,7 @@ def step_metrics(t, e):
     if not outside:
         settling_time = 0.0
     elif outside[-1] == len(r) - 1:
-        settling_time = nan  # still outside the band at the end of the log: did not settle
+        settling_time = nan
     else:
         settling_time = t[outside[-1] + 1]
 
