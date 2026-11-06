@@ -13,6 +13,7 @@ def load_errors(folder):
     linear = read_csv(os.path.join(ROOT, folder, "linear.csv"))
     angular = read_csv(os.path.join(ROOT, folder, "angular.csv"))
 
+    # Both logs are written on the same control step, so rows line up one to one
     n = min(len(linear["e"]), len(angular["e"]))
     t = [(stamp - linear["stamp"][0]) / 1e9 for stamp in linear["stamp"][:n]]
     e_lin = [copysign(d, cos(th)) for d, th in zip(linear["e"][:n], angular["e"][:n])]
@@ -33,7 +34,7 @@ def step_metrics(t, e):
     if not outside:
         settling_time = 0.0
     elif outside[-1] == len(r) - 1:
-        settling_time = nan
+        settling_time = nan  # still outside the band at the end of the log: did not settle
     else:
         settling_time = t[outside[-1] + 1]
 

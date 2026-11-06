@@ -60,7 +60,7 @@ class PID_ctrl:
             
             dt=(t1.nanoseconds - t0.nanoseconds) / 1e9
             
-            if dt <= 0:
+            if dt <= 0: # Fall back to dt = 0.1 s (10 Hz) if timestamps repeat or arrive out of order
                 dt = 0.1
 
             dt_avg+=dt

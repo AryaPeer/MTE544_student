@@ -1,4 +1,7 @@
-# run this from root with: python3 analysis/point_figures.py
+# Saves the report figures comparing the P and tuned PID point controllers to plots/
+#
+# Usage (run this from root):
+#   python3 analysis/point_figures.py
 
 import os
 import re
@@ -10,9 +13,10 @@ from plot_run import ROOT, read_csv
 OUTPUT_DIR = os.path.join(ROOT, "plots")
 GOAL = (0.75, 0.75)
 
+# "terms" lists the gains each controller actually used: p, v (derivative) and i
 RUNS = [
-    {"name": "P controller", "folder": "data/point/p_tuned", "terms": "p"},
-    {"name": "Tuned PID controller", "folder": "data/point/pid_tuned", "terms": "pvi"},
+    {"name": "P controller", "folder": "data/point/p_tuned", "gains_file": "gains.txt", "terms": "p"},
+    {"name": "Tuned PID controller", "folder": "data/point/pid_tuned", "gains_file": "gains.txt", "terms": "pvi"},
 ]
 
 BLUE, ORANGE, AQUA = "#2a78d6", "#eb6834", "#1baf7a"
@@ -36,11 +40,12 @@ def load_run(run):
     folder = os.path.join(ROOT, run["folder"])
     data = {name: read_csv(os.path.join(folder, f"{name}.csv")) for name in ("linear", "angular", "robot_pose")}
 
+    # Stamps are in nanoseconds; every log in a run shares the same clock
     t0 = data["robot_pose"]["stamp"][0]
     for log in data.values():
         log["t"] = [(stamp - t0) / 1e9 for stamp in log["stamp"]]
 
-    with open(os.path.join(folder, "gains.txt")) as file:
+    with open(os.path.join(folder, run["gains_file"])) as file:
         gains = {motion + term: value for motion, term, value in re.findall(r"k([la])([pvi])=([\d.]+)", file.read())}
 
     return {**run, **data, "gains": gains}

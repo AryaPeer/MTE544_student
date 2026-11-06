@@ -1,4 +1,7 @@
-# run this from root with: python3 analysis/trajectory_figures.py
+# Saves x-y plots of the parabola and sigmoid runs against their reference curves to plots/
+#
+# Usage (run this from root):
+#   python3 analysis/trajectory_figures.py
 
 import os
 
@@ -6,7 +9,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from plot_run import read_csv
-from point_figures import AQUA, BLUE, ORANGE, OUTPUT_DIR, ROOT
+from point_figures import AQUA, BLUE, ORANGE, OUTPUT_DIR, ROOT  # also applies the shared plot style
 
 AXIS_LIMITS = (-0.1, 2.6)
 
