@@ -29,7 +29,7 @@ class PID_ctrl:
         
         if status == False:
             self.__update(stamped_error)
-            return 0,0
+            return 0.0
         else:
             return self.__update(stamped_error)
 
@@ -58,13 +58,15 @@ class PID_ctrl:
             t1=Time.from_msg(self.history[i][1])
             
             dt=(t1.nanoseconds - t0.nanoseconds) / 1e9
-            
-            dt_avg+=dt            
-            
-            # calculate the error dot 
-            # the dt sometimes happen to be zero or very small due to the 
+
+            # the dt sometimes happen to be zero or very small due to the
             # connection issues to prevent the zero division error
-            dt =0.1
+            if dt <= 0:
+                dt = 0.1
+
+            dt_avg+=dt
+
+            # calculate the error dot
             error_dot+=(self.history[i][0] - self.history[i-1][0])/dt
             
         error_dot/=len(self.history)
