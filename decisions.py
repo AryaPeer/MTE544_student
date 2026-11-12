@@ -29,7 +29,7 @@ class decision_maker(Node):
         
         publishing_period=1/rate
 
-        self.reachThreshold=0.01
+        self.reachThreshold=0.03
 
 
         # TODO Part 3: use the Kalman Filter
@@ -47,7 +47,9 @@ class decision_maker(Node):
             self.controller=None
             self.planner=None
             self.linearVelocity = 0
-        
+            self.spiral_t = 0.0                       # elapsed spiral time [s]
+            self.publishing_period = publishing_period
+
         else:
             print("Error! you don't have this type of planner", file=sys.stderr)
             return
@@ -72,17 +74,20 @@ class decision_maker(Node):
         vel_msg=Twist()
 
         if self.motion_type == SPIRAL_4TUNE:
+            # modified spiral code to increase spiral until keyboard interrupt (ctrl-c)
+            self.spiral_t += self.publishing_period
             self.linearVelocity += 0.01 if self.linearVelocity < 1.0 else 0.0
-            vel_msg.linear.x=self.linearVelocity
-            vel_msg.angular.z=1.0
+            radius = min(0.1 + 0.05 * self.spiral_t, 1.0)         # radius increase by 5cm per sec, up to 1m radius
+            vel_msg.linear.x = self.linearVelocity
+            vel_msg.angular.z = self.linearVelocity / radius
             self.publisher.publish(vel_msg)
             return
 
         
         if type(self.goal) == list:
-            reached_goal=True if calculate_linear_error(self.localizer.getPose(), self.goal[-1]) <self.reachThreshold else False
+            reached_goal=True if calculate_linear_error(self.localizer.getPose(), self.goal[-1]) < self.reachThreshold else False
         else: 
-            reached_goal=True if calculate_linear_error(self.localizer.getPose(), self.goal) <self.reachThreshold else False
+            reached_goal=True if calculate_linear_error(self.localizer.getPose(), self.goal) < self.reachThreshold else False
 
 
         if reached_goal:
@@ -127,6 +132,10 @@ def main(args=None):
         spin(DM)
     except SystemExit:
         print(f"reached there successfully {DM.localizer.pose}")
+    except KeyboardInterrupt:
+        # sent twist of 0 to stop robot if ctrl-c pressed
+        DM.publisher.publish(Twist())
+        print("stopped by user")
 
 
 

@@ -42,28 +42,38 @@ class localization(Node):
 
     def initRawSensors(self):
         self.create_subscription(odom, "/odom", self.odom_callback, qos_profile=odom_qos)
-        
+
+    """
+    Sets up EKF and sensor subscriptions in ros.
+    Initialize state vectors, covariance matrixes Q, R, P with init values
+    """
     def initKalmanfilter(self, dt):
         
         # TODO Part 3: Set up the quantities for the EKF (hint: you will need the functions for the states and measurements)
         
-        x= np.zeros(6)
+        x= np.zeros(6) # initial state, set to 0 for origin
         
-        Q= 0.5 * np.eye(6) 
+        Q= 0.5 * np.eye(6) # init state covariance, increase q means ekf follows measuremnts more, decrease q and filter follows model more
 
-        R= 0.5 * np.eye(4)
+        R= 0.5 * np.eye(4) # init measurement covariance, increase R means measurements weighted less
         
         P= np.eye(6) # initial covariance
         
         self.kf=kalman_filter(P,Q,R, x, dt)
         
         # TODO Part 3: Use the odometry and IMU data for the EKF
+        # subscribe to odom and imu
         self.odom_sub=message_filters.Subscriber(self, odom, "/odom", qos_profile=odom_qos)
         self.imu_sub=message_filters.Subscriber(self, Imu, "/imu", qos_profile=odom_qos)
-        
+
+        # only calls fusion_callback when it has one odom and imu message within the same timestamp
+        # guarantees sensor measurements in z vector describes the same instant
         time_syncher=message_filters.ApproximateTimeSynchronizer([self.odom_sub, self.imu_sub], queue_size=10, slop=0.1)
         time_syncher.registerCallback(self.fusion_callback)
-    
+
+    """
+    Runs one full ekf cycle (predicition step + update step) for each synced odom/imu pair, then logs data
+    """
     def fusion_callback(self, odom_msg: odom, imu_msg: Imu):
         
         # TODO Part 3: Use the EKF to perform state estimation
