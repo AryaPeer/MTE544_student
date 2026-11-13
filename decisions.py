@@ -3,8 +3,12 @@ import sys
 from utilities import euler_from_quaternion, calculate_angular_error, calculate_linear_error
 from pid import PID_ctrl
 
-from rclpy import init, spin, spin_once
+from rclpy import init, spin, spin_once, shutdown, ok
 from rclpy.node import Node
+try:
+    from rclpy.signals import SignalHandlerOptions
+except ImportError:  # older ROS 2 distros (e.g. Foxy) don't have this
+    SignalHandlerOptions = None
 from geometry_msgs.msg import Twist
 
 
@@ -113,8 +117,13 @@ import argparse
 def main(args=None):
     
     
-    init()
-    
+    # Disable rclpy's own SIGINT handler so the context stays valid after ctrl-c;
+    # otherwise rclpy shuts down before our KeyboardInterrupt handler can publish the stop command
+    if SignalHandlerOptions is not None:
+        init(args=None, signal_handler_options=SignalHandlerOptions.NO)
+    else:
+        init()
+
     
     if args.motion == "point":
         DM=decision_maker(Twist, "/cmd_vel", 10, motion_type=POINT_PLANNER)
@@ -133,9 +142,24 @@ def main(args=None):
     except SystemExit:
         print(f"reached there successfully {DM.localizer.pose}")
     except KeyboardInterrupt:
-        # sent twist of 0 to stop robot if ctrl-c pressed
-        DM.publisher.publish(Twist())
+        # send twist of 0 to stop robot if ctrl-c pressed
+        try:
+            for _ in range(5):          # publish a few times so the stop isn't dropped
+                DM.publisher.publish(Twist())
+        except Exception as e:
+            print(f"could not publish stop command: {e}", file=sys.stderr)
         print("stopped by user")
+    finally:
+        # save logs (controller is None for spiral, so guard it)
+        DM.localizer.loc_logger.save_log()
+        if DM.controller is not None:
+            DM.controller.PID_angular.logger.save_log()
+            DM.controller.PID_linear.logger.save_log()
+
+        DM.localizer.destroy_node()
+        DM.destroy_node()
+        if ok():
+            shutdown()
 
 
 
