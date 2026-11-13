@@ -25,7 +25,10 @@ odom_qos=QoSProfile(reliability=2, durability=2, history=1, depth=10)
 
 class localization(Node):
     
-    def __init__(self, type, dt, loggerName="robotPose.csv", loggerHeaders=["imu_ax", "imu_ay", "kf_ax", "kf_ay","kf_vx","kf_w","kf_x", "kf_y","stamp"]):
+    # first 8 columns are the original template headers (kept so old logs and plots still line up);
+    # odom_* and kf_th were added so estimates can be plotted against the raw odometry measurements/path
+    def __init__(self, type, dt, loggerName="robotPose.csv", loggerHeaders=["imu_ax", "imu_ay", "kf_ax", "kf_ay","kf_vx","kf_w","kf_x", "kf_y",
+                                                                             "odom_v", "odom_w", "kf_th", "odom_x", "odom_y", "odom_th", "stamp"]):
 
         super().__init__("localizer")
 
@@ -53,9 +56,15 @@ class localization(Node):
         
         x= np.zeros(6) # initial state, set to 0 for origin
         
-        Q= 0.5 * np.eye(6) # init state covariance, increase q means ekf follows measuremnts more, decrease q and filter follows model more
+        # final tuning (EKF follows odom closely):
+        Q = 0.5 * np.eye(6)
+        R = np.diag([0.01, 0.01, 0.5, 0.5])
 
-        R= 0.5 * np.eye(4) # init measurement covariance, increase R means measurements weighted less
+        # kidnap demo: odom trusted less (R=0.5) and IMU trusted more (R=0.1), so when the robot is
+        # picked up and moved the EKF reacts to what the IMU feels while odom does not -> clear EKF vs odom split
+        # Q = 0.5 * np.eye(6)
+
+        # R = np.diag([0.5, 0.5, 0.1, 0.1])   # odom v, odom w, imu ax, imu ay
         
         P= np.eye(6) # initial covariance
         
@@ -95,7 +104,13 @@ class localization(Node):
         self.pose=np.array([xhat[0], xhat[1], xhat[2], odom_msg.header.stamp])
 
         # TODO Part 4: log your data
-        self.loc_logger.log_values([z[2], z[3], xhat[5], xhat[4]*xhat[3], xhat[4], xhat[3], xhat[0], xhat[1], odom_msg.header.stamp.sec + odom_msg.header.stamp.nanosec*1e-9])
+        # imu measurements, EKF estimates of ax (=vdot) and ay (=v*w), EKF v, w, x, y,
+        # then the odom measurements (v, w), EKF heading and the raw odom pose for comparison
+        self.loc_logger.log_values([z[2], z[3], xhat[5], xhat[4]*xhat[3], xhat[4], xhat[3], xhat[0], xhat[1],
+                                    z[0], z[1], xhat[2],
+                                    odom_msg.pose.pose.position.x, odom_msg.pose.pose.position.y,
+                                    euler_from_quaternion(odom_msg.pose.pose.orientation),
+                                    odom_msg.header.stamp.sec + odom_msg.header.stamp.nanosec*1e-9])
       
     def odom_callback(self, pose_msg):
         

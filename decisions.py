@@ -78,13 +78,17 @@ class decision_maker(Node):
         vel_msg=Twist()
 
         if self.motion_type == SPIRAL_4TUNE:
-            # modified spiral code to increase spiral until keyboard interrupt (ctrl-c)
-            self.spiral_t += self.publishing_period
             self.linearVelocity += 0.01 if self.linearVelocity < 1.0 else 0.0
-            radius = min(0.1 + 0.05 * self.spiral_t, 1.0)         # radius increase by 5cm per sec, up to 1m radius
-            vel_msg.linear.x = self.linearVelocity
-            vel_msg.angular.z = self.linearVelocity / radius
+            vel_msg.linear.x=self.linearVelocity
+            vel_msg.angular.z=1.0
             self.publisher.publish(vel_msg)
+            # # modified spiral code to increase spiral until keyboard interrupt (ctrl-c)
+            # self.spiral_t += self.publishing_period
+            # self.linearVelocity += 0.01 if self.linearVelocity < 1.0 else 0.0
+            # radius = min(0.1 + 0.05 * self.spiral_t, 1.0)         # radius increase by 5cm per sec, up to 1m radius
+            # vel_msg.linear.x = self.linearVelocity
+            # vel_msg.angular.z = self.linearVelocity / radius
+            # self.publisher.publish(vel_msg)
             return
 
         
