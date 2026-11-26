@@ -26,15 +26,14 @@ class Node:
     def __eq__(self, other):
         return self.position == other.position
 
-# This function return the path of the search
-
+# calculates estimated cost from a cell to goal, using either manhattan or euclidean distances
 def heuristic_cost(current_node_position, end_node_position):
     if HEURISTIC == "MANHATTAN":
         return abs(current_node_position[0] - end_node_position[0]) + abs(current_node_position[1] - end_node_position[1])
     else:
         return sqrt((current_node_position[0] - end_node_position[0]) ** 2 + (current_node_position[1] - end_node_position[1]) ** 2)
 
-
+# This function return the path of the search
 def return_path(current_node, maze):
     path = []
     no_rows, no_columns = np.shape(maze)
@@ -100,6 +99,7 @@ def search(maze, start, end):
 
     # TODO PART 4 what squares do we search . serarch movement is left-right-top-bottom
     # (4 or 8 movements) from every positon
+    # 8 connected moves, 4 straight and 4 diagonal. Diagonal has proportionally higher cost (sqrt(2))
     move = [[-1, 0],  # go up
             [0, -1],  # go left
             [1, 0],  # go down
@@ -127,6 +127,8 @@ def search(maze, start, end):
                 d) else move the child to yet_to_visit dict
     """
     # TODO PART 4 find maze has got how many rows and columns
+    # rows = map width (cells), columns = map height (cells)
+    # used for boundary check
     no_rows, no_columns = np.shape(maze)
 
     # Loop until you find the end
@@ -165,9 +167,11 @@ def search(maze, start, end):
         for new_position in move:
 
             # TODO PART 4 Get node position
+            # neighbour cell = current cell + move offset
             node_position = (current_node.position[0] + new_position[0], current_node.position[1] + new_position[1])
 
             # TODO PART 4 Make sure within range (check if within maze boundary)
+            # skip any neighbours outside of map bounds
             if (node_position[0] < 0 or node_position[0] >= no_rows or node_position[1] < 0 or node_position[1] >= no_columns):
                 continue
 
@@ -190,6 +194,7 @@ def search(maze, start, end):
                 continue
 
             # TODO PART 4 Create the f, g, and h values
+            # g = parent's g + step length (distance formula, 1 for straight, sqrt(2) for diagonal)
             child.g = current_node.g + sqrt((child.position[0] - current_node.position[0]) ** 2 + (child.position[1] - current_node.position[1]) ** 2)
             # Heuristic costs calculated here, this is using heuristic cost
             child.h = heuristic_cost(child.position, end_node.position)

@@ -43,10 +43,10 @@ class decision_maker(Node):
         publishing_period=1/rate
 
         # TODO PART 5 choose your threshold
-        self.reachThreshold=0.03
+        self.reachThreshold=0.03 # goal is reached within 3cm of final waypoint, if turtlebot never reaches goal increase threshold
 
         # TODO PART 5 your localization type
-        self.localizer=localization(rawSensors)
+        self.localizer=localization(rawSensors) # changed from kalman filter since odom was realiable during testing
 
 
         
@@ -57,6 +57,7 @@ class decision_maker(Node):
         
         elif motion_type==TRAJECTORY_PLANNER:
             # TODO PART 5 Put the gains that you concluded from lab 2
+            # PID gains from lab 2
             self.controller=trajectoryController(klp=0.4, klv=0.15, kli=0.3, kap=1.1, kav=0.0, kai=0.0)
             self.planner=planner(TRAJECTORY_PLANNER)
         

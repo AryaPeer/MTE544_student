@@ -74,7 +74,7 @@ class localization(Node):
             # TODO PART 5 Put the Q and R matrices
             # that you conclude from lab Three
             Q=0.5*np.eye(6)
-            R=np.diag([0.01, 0.01, 0.5, 0.5])
+            R=np.diag([0.01, 0.01, 0.5, 0.5]) # R derived from final tuning in lab 3
             P=np.eye(6)
                         
             self.kf=kalman_filter(P,Q,R, x)
@@ -109,7 +109,7 @@ class localization(Node):
                     euler_from_quaternion(pose_msg.pose.pose.orientation),
                     pose_msg.header.stamp]
         
-        #self.loc_logger.log_values([self.pose[0], self.pose[1], self.pose[2], Time.from_msg(self.pose[3]).nanoseconds])
+        self.loc_logger.log_values([self.pose[0], self.pose[1], self.pose[2], Time.from_msg(self.pose[3]).nanoseconds])
 
         
     def getPose(self):

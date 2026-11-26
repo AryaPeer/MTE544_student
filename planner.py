@@ -31,7 +31,7 @@ class planner:
         # TODO PART 5 Create the cost-map, the laser_sig is 
         # the standard deviation for the gausiian for which
         # the mean is located on the occupant grid. 
-        self.m_utilites=mapManipulator(laser_sig=0.4)
+        self.m_utilites=mapManipulator(laser_sig=0.4) # larger sigma = wider buffer zone around walls
             
         self.costMap=self.m_utilites.make_likelihood_field()
         
@@ -48,7 +48,7 @@ class planner:
         endPose=self.m_utilites.position_2_cell(endPoseCart)
         
         # TODO PART 5 convert the cell pixels into the cartesian coordinates
-        
+        # run A* in pixel space, then map each cell back to meters and append to Path list
         Path = list(map(self.m_utilites.cell_2_position, search(self.costMap, startPose, endPose)))
 
         path_vals = []
